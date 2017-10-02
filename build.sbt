@@ -7,8 +7,8 @@ version := "0.0.1"
 scalaVersion := "2.12.3"
 
 libraryDependencies ++= Seq(
-  "org.scalatest"  %% "scalatest"   % "3.0.1"  % "test",
-  "org.scalacheck" %% "scalacheck"  % "1.13.5" % "test"
+  "org.scalacheck" %% "scalacheck"  % "1.13.5",
+  "org.scalatest"  %% "scalatest"   % "3.0.1"  % "test"
 )
 
 scalacOptions ++= Seq(
@@ -29,5 +29,7 @@ scalacOptions in (Compile, console) ~= (_.filterNot(Seq("-Xfatal-warnings", "-Yw
 
 scalacOptions in (Test, console) := (scalacOptions in (Compile, console)).value
 
-initialCommands in (Test, console) := "import org.scalacheck._, net.ssanj.scalacheck.ease._"
+initialCommands in (Compile, console) := "import org.scalacheck._, net.ssanj.scalacheck.ease._"
+
+initialCommands in (Test, console) := (initialCommands in (Test, console)).value
 

@@ -3,7 +3,7 @@ package internal
 
 object Measure {
 
-  sealed trait Num[A] {
+  sealed trait Num[A] extends Product with Serializable {
     val value: A
     val label: String = this.toString.takeWhile(_ != '(') //hacky
   }
@@ -114,7 +114,7 @@ object Measure {
 
       import scala.collection.immutable.TreeMap
       val recoredValues =
-        (TreeMap[NumKey, Vector[Num[Int]]]() ++: ledger).toVector.map {
+        (TreeMap[NumKey, Vector[Num[Int]]]() ++ ledger).toVector.map {
         case (NumKey(_, label), xs) => s"${label.padTo(maxKeyLength, " ").mkString} -> ${xs.length}"
       }
 

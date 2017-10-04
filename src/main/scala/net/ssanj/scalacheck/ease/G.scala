@@ -17,15 +17,17 @@ object G {
    * In the example below, the generator either fails or chooses a number between 1 and 5. Given
    * a suitable number of retries, this generator can be used to yield a List of 10 Ints between 1 and 5.
    *
-   * {{{
+   * @example {{{
    *   sampleN(10, Gen.oneOf(Gen.fail, Gen.choose(1, 5)), 20)
    * }}}
    *
-   * Use it without retries for stable generators that won't fail:
+   * To use it without for generators that won't fail, set retries to 0:
    *
-   * {{{
+   * @example {{{
    *   sampleN(20, Gen.alphaStr, 0)
    * }}}
+   *
+   * or call sampleN[A](n: Int, ga: Gen[A]): Option[List[A]]
    *
    * @tparam A The type of values generated from the generator.
    * @param n The number of elements required from the supplied generator.
@@ -47,4 +49,16 @@ object G {
 
     doSampleN(r, List.empty[A])
   }
+
+  /**
+   * Returns a Some(List[A]) of the required size with elements from a supplied
+   * generator of A, or fails with a None if a List of the given size can't
+   * be generated. Does not handle retrying any errors from the supplied generator.
+   * If retries are needed use the other variation of this method.
+   *
+   * @example {{{
+   *   sampleN(20, Gen.alphaStr)
+   * }}}
+   */
+  def sampleN[A](n: Int, ga: Gen[A]): Option[List[A]] = sampleN[A](n, ga, 0)
 }

@@ -6,30 +6,45 @@ import org.scalacheck.Gen
 object G {
 
   /**
-   * A sample method that returns a List of the required size *n* as a Some or fails
-   * with a None.
+   * Returns a Some(List[A]) of the required size with elements from a supplied
+   * generator of A, or fails with a None if a List of the given size can't
+   * be generated.
+   *
+   * Discards any failures from the supplied generator and only returns
+   * valid generation values. If the number of retries is exhausted before the required number of elements is collected,
+   * any collected values are discarded and a None is returned.
+   *
+   * In the example below, the generator either fails or chooses a number between 1 and 5. Given
+   * a suitable number of retries, this generator can be used to yield a List of 10 Ints between 1 and 5.
    *
    * {{{
-   *   sampleN(10, Gen.oneOf(Gen.fail, Gen.choose(1, 5)), 100)
+   *   sampleN(10, Gen.oneOf(Gen.fail, Gen.choose(1, 5)), 20)
    * }}}
    *
-   * @tparam A The type of values generated from the Generator.
-   * @param n The number of elements required from the supplied Generator.
-   * @param ga The Generator of type A.
-   * @param retries The number of types to retry a fail generation.
-   * @return A Some List of the requested size *n* or a None
+   * Use it without retries for stable generators that won't fail:
+   *
+   * {{{
+   *   sampleN(20, Gen.alphaStr, 0)
+   * }}}
+   *
+   * @tparam A The type of values generated from the generator.
+   * @param n The number of elements required from the supplied generator.
+   * @param ga The generator of values of type A.
+   * @param r The number of times to retry a fail generator.
    */
-  def sampleN[A](n: Int, ga: Gen[A], retries: Int): Option[List[A]] = {
+  def sampleN[A](n: Int, ga: Gen[A], r: Int): Option[List[A]] = {
 
     @tailrec
-    def doSampleN(_n: Int, _ga: Gen[A], _retries: Int, _results: List[A]): Option[List[A]] = {
-        if (_results.length == _n) Option(_results)
-        else if (_retries <= 0) (None: Option[List[A]]) //less than n elements and no retries left
+    def doSampleN(retries: Int, results: List[A]): Option[List[A]] = {
+        if (results.length >= n) Option(results)
+        else if (retries < 0) (None: Option[List[A]]) //less than n elements and no retries left
         else {
-          doSampleN(n, _ga, _retries - 1, _ga.sample.fold(_results)(_ +: _results))
+          val round = ga.sample
+          val newRetries = round.fold(retries - 1)(_ => retries)
+          doSampleN(newRetries, round.fold(results)(_ +: results))
         }
     }
 
-    doSampleN(n, ga, retries, List.empty[A])
+    doSampleN(r, List.empty[A])
   }
 }

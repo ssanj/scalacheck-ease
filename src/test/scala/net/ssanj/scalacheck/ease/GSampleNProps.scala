@@ -36,4 +36,12 @@ object GSampleNProps extends Properties("G.sampleN") {
       results.fold(falsified)(_.length ?= n)
     }
   }
+
+  property("should return None when given a Gen that always fails") = {
+      Prop.forAll {  m: Int1000 =>
+        val n = m.value
+        val results = G.sampleN(n, Gen.fail[Boolean])
+        results.fold(passed)(_ => falsified)
+      }
+  }
 }

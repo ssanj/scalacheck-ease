@@ -4,7 +4,35 @@ Making some things in [ScalaCheck](http://scalacheck.org/index.html) easier.
 
 ## sampleN
 
-Something that I do often is to sample generators to have a look at the output values. ScalaCheck provides us with a couple of functions if we want to get multiple sample values out of a generator:
+Used for sampling a list of values from a generator that may fail.
+
+__sampleN__ is defined as:
+
+```scala
+sampleN[A](n: Int, ga: Gen[A], r: Int): Option[List[A]]
+```
+
+where __n__ is the number of values required from the generator __ga__ and __r__ is the number of times to retry the generator if it fails to generate a value. If the sample succeeds returns a list of values of size __n__ within a [Some](http://www.scala-lang.org/api/2.12.3/scala/Some.html). If the generator __ga__ fails more than __r__ times, the result is a [None](http://www.scala-lang.org/api/2.12.3/scala/None$.html).
+
+__sampleN__ has another variant which can be used with generators that don't fail and thus don't need a retry parameter:
+
+```scala
+sampleN[A](n: Int, ga: Gen[A]): Option[List[A]]
+```
+
+Example usage:
+
+```scala
+import org.scalacheck._
+import net.ssanj.scalacheck.ease.G
+
+G.sampleN(20, Gen.oneOf(Gen.fail, Gen.alphaChar), 100)
+res1: Option[List[Char]] = Some(List(k, q, z, i, b, l, j, b, x, v, u, e, X, x, n, j, M, f, a, w))
+```
+
+### Why use this?
+
+Something I do often is sample generators to inspect their distribution. ScalaCheck provides us with a couple of functions if we want to get multiple sample values out of a generator:
 
 1. [listOfN](https://github.com/rickynils/scalacheck/blob/1.13.5_sonatype/src/main/scala/org/scalacheck/Gen.scala#L587)
 1. [infiniteStream](https://github.com/rickynils/scalacheck/blob/1.13.5_sonatype/src/main/scala/org/scalacheck/Gen.scala#L604)
@@ -53,7 +81,7 @@ scala> g2.sample
 res1: Option[List[Char]] = None
 ```
 
-Even if the generator fails to generate a single value, all the generated values are discarded and a __None__ is returned. Wouldn't it be nice if __listOfN__ skipped the failed generations and returned a list of valid values?
+If the generator fails to generate a single value, all the generated values are discarded and a __None__ is returned. Wouldn't it be nice if __listOfN__ skipped the failed generations and returned a list of valid values?
 
 ### infiniteStream
 
@@ -110,7 +138,7 @@ org.scalacheck.Gen$RetrievalError: couldn't generate value
   ... 39 elided
 ```
 
-This function is unsafe and throws an exception even if the generator fails to generate a single value. Wouldn't it be nice if this method was safe and returned us a stream of valid values?
+This function is unsafe and throws an exception if the generator fails when generating a single value. Wouldn't it be nice if this method was safe and returned us a stream of valid values?
 
 This is where [__sampleN__](https://github.com/ssanj/scalacheck-ease/blob/master/src/main/scala/net/ssanj/scalacheck/ease/G.scala#L37) comes in. __sampleN__ can be used with the above examples as:
 

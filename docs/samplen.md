@@ -1,19 +1,19 @@
 # sampleN
 
-Used for sampling a list of values from a generator that may fail.
+Used for sampling a number of values from a generator that may fail.
 
 __sampleN__ is defined as:
 
 ```scala
-sampleN[A](n: Int, ga: Gen[A], r: Int): Option[List[A]]
+sampleN[A](n: Int, ga: Gen[A], r: Int): Option[Vector[A]]
 ```
 
-where __n__ is the number of values required from the generator __ga__ and __r__ is the number of times to retry the generator if it fails to generate a value. If the sample succeeds returns a list of values of size __n__ within a [Some](http://www.scala-lang.org/api/2.12.3/scala/Some.html). If the generator __ga__ fails more than __r__ times, the result is a [None](http://www.scala-lang.org/api/2.12.3/scala/None$.html).
+where __n__ is the number of values required from the generator __ga__ and __r__ is the number of times to retry the generator if it fails to generate a value. If the sample succeeds returns a vector of values of size __n__ within a [Some](http://www.scala-lang.org/api/2.12.3/scala/Some.html). If the generator __ga__ fails more than __r__ times, the result is a [None](http://www.scala-lang.org/api/2.12.3/scala/None$.html).
 
 __sampleN__ has another variant which can be used with generators that don't fail and thus don't need a retry parameter:
 
 ```scala
-sampleN[A](n: Int, ga: Gen[A]): Option[List[A]]
+sampleN[A](n: Int, ga: Gen[A]): Option[Vector[A]]
 ```
 
 Example usage:
@@ -140,16 +140,16 @@ This is where [__sampleN__](https://github.com/ssanj/scalacheck-ease/blob/master
 
 ```scala
 scala> G.sampleN(10, alphaChar)
-res9: Option[List[Char]] = Some(List(p, h, d, y, x, j, n, f, a, x))
+res9: Option[Vector[Char]] = Some(Vector(p, h, d, y, x, j, n, f, a, x))
 
 scala> G.sampleN(10, flakeyGen, 100)
-res10: Option[List[Char]] = Some(List(l, q, u, h, n, m, x, d, l, u))
+res10: Option[Vector[Char]] = Some(Vector(l, q, u, h, n, m, x, d, l, u))
 ```
 
 __sampleN__ is defined as:
 
 ```scala
-sampleN[A](n: Int, ga: Gen[A], r: Int): Option[List[A]]
+sampleN[A](n: Int, ga: Gen[A], r: Int): Option[Vector[A]]
 ```
 
 where __n__ is the number of values required from the generator __ga__ and __r__ is the number of times to retry the generator if it fails to generate a value.
@@ -158,7 +158,7 @@ So what happens when the generator can't generate __n__ valid values even with t
 
 ```scala
 scala> G.sampleN(10, fail)
-res13: Option[List[Nothing]] = None
+res13: Option[Vector[Nothing]] = None
 ```
 
 It returns a __None__ without throwing an exception and therefore can be used safely.
@@ -166,12 +166,12 @@ It returns a __None__ without throwing an exception and therefore can be used sa
 __sampleN__ has another variant which can be used with generators that don't fail and thus don't need a retry parameter:
 
 ```scala
-sampleN[A](n: Int, ga: Gen[A]): Option[List[A]]
+sampleN[A](n: Int, ga: Gen[A]): Option[Vector[A]]
 ```
 
 For example:
 
 ```scala
 scala> G.sampleN(10, alphaChar)
-res14: Option[List[Char]] = Some(List(u, z, i, V, d, p, e, n, m, r))
+res14: Option[Vector[Char]] = Some(Vector(u, z, i, V, d, p, e, n, m, r))
 ```

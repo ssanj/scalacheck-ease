@@ -10,7 +10,11 @@ object GSampleNProps extends Properties("G.sampleN") {
 
   final case class Int1000(value: Int)
 
+  final case class Int1000W0(value: Int)
+
   private implicit val arbInt1000 = Arb(Gen.choose(0, 1000).map(Int1000))
+
+  private implicit val arbInt1000W0 = Arb(Gen.choose(1, 1000).map(Int1000W0))
 
   property("result should be of the requested size with failing Gens and retries") =
     Prop.forAll { m: Int1000 =>
@@ -38,7 +42,7 @@ object GSampleNProps extends Properties("G.sampleN") {
   }
 
   property("should return None when given a Gen that always fails") = {
-      Prop.forAll {  m: Int1000 =>
+      Prop.forAll {  m: Int1000W0 => //only use numbers >= 1, 0 passes by default
         val n = m.value
         val results = G.sampleN(n, Gen.fail[Boolean])
         results.fold(passed)(_ => falsified)

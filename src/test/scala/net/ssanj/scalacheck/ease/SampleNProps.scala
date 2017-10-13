@@ -4,7 +4,7 @@ import org.scalacheck._
 import org.scalacheck.Prop._
 import syntax._
 
-object GSampleNProps extends Properties("G.sampleN") {
+object SampleNProps extends Properties("sampleN") {
 
   private val faultyGen: Gen[String] = Gen.oneOf(Gen.fail, Gen.alphaStr)
 

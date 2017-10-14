@@ -9,4 +9,6 @@ package object syntax {
 
   //shorthand for creating Arbitrary instances
   val Arb = Arbitrary
+
+  type Arb[A] = Arbitrary[A]
 }

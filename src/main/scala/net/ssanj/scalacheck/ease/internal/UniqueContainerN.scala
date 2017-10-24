@@ -13,15 +13,32 @@ trait UniqueContainerN {
     uniqueListN(size, arb[A], size * 3)(isEqual).map((_, size))
   )
 
-  def uniqueListNRSized[A: Arb](r: Int)(isEqual: (A, A) => Boolean): Gen[(List[A], Int)] = Gen.sized(size =>
-    uniqueListN(size, arb[A], r)(isEqual).map((_, size))
+  def uniqueListNSized[A](ga: Gen[A])(isEqual: (A, A) => Boolean): Gen[(List[A], Int)] = Gen.sized(size =>
+    uniqueListN(size, ga, size * 3)(isEqual).map((_, size))
+  )
+
+  def uniqueListNRSized[A: Arb](retry: Int => Int)(isEqual: (A, A) => Boolean): Gen[(List[A], Int)] = Gen.sized(size =>
+    uniqueListN(size, arb[A], retry(size))(isEqual).map((_, size))
+  )
+
+  def uniqueListNRSized[A](ga: Gen[A], retry: Int => Int)(isEqual: (A, A) => Boolean): Gen[(List[A], Int)] = Gen.sized(size =>
+    uniqueListN(size, ga, retry(size))(isEqual).map((_, size))
   )
 
   def uniqueListN[A: Arb](isEqual: (A, A) => Boolean): Gen[List[A]] =
     uniqueListNSized[A](isEqual).map(_._1)
 
+  def uniqueListN[A](ga: Gen[A])(isEqual: (A, A) => Boolean): Gen[List[A]] =
+    uniqueListNSized[A](ga)(isEqual).map(_._1)
+
   def uniqueListN[A](n: Int, ga: Gen[A], r: Int)(isEqual: (A, A) => Boolean) =
     uniqueListNSeed[A](n, ga, r)(isEqual, rng.Seed.random)
+
+  def uniqueListN[A: Arb](n: Int, r: Int)(isEqual: (A, A) => Boolean) =
+    uniqueListNSeed[A](n, arb[A], r)(isEqual, rng.Seed.random)
+
+  def uniqueListNSeed[A: Arb](n: Int, r: Int)(isEqual: (A, A) => Boolean, seed: rng.Seed): Gen[List[A]] =
+    uniqueListNSeed[A](n, arb[A], r)(isEqual, seed)
 
   def uniqueListNSeed[A](n: Int, ga: Gen[A], r: Int)(isEqual: (A, A) => Boolean, seed: rng.Seed): Gen[List[A]] = {
 

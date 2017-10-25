@@ -4,7 +4,7 @@ import org.scalacheck.Properties
 import org.scalacheck._
 import syntax._
 
-object UniqueListNProps extends Properties("uniqueListN") {
+object UniqueContainerNProps extends Properties("UniqueContainerN") {
 
   private def assertUniqueValues[A]: List[A] => Prop = values => values.toSet.size == values.length
 
@@ -53,4 +53,7 @@ object UniqueListNProps extends Properties("uniqueListN") {
 
   property("should always contain unique elements for AnyVal given n with Gen") =
     containerWithUniqueValuesWithNGenProp(arb[AnyVal])
+
+  include(UniqueListNRSizedProps.sizeProperty)
+  include(UniqueListNSizedProps.sizeProperty)
 }

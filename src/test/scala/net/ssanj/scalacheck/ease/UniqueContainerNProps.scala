@@ -54,6 +54,7 @@ object UniqueContainerNProps extends Properties("UniqueContainerN") {
   property("should always contain unique elements for AnyVal given n with Gen") =
     containerWithUniqueValuesWithNGenProp(arb[AnyVal])
 
-  include(UniqueListNRSizedProps.sizeProperty)
-  include(UniqueListNSizedProps.sizeProperty)
+  include(UniqueListNRSizedProps.properties)
+  include(UniqueListNSizedProps.properties)
+  include(UniqueListNSeedProps.properties)
 }

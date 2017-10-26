@@ -6,7 +6,7 @@ import UniqueListNSized._
 
 object UniqueListNSizedProps  {
 
-  def sizeProperty: Properties =
+  def properties: Properties =
     new Properties("uniqueListNSized") {
        property("should always return Int containers of the required size with Arb") =
         containerWithSizeArbProp(G.uniqueListNSized[Int])

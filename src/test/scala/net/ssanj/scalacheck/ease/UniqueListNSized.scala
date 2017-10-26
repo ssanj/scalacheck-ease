@@ -32,4 +32,17 @@ object UniqueListNSized {
 
   def containerWithSizedSeedGenProp[A: Arb](f: (Int, Gen[A], Int) => (Predicate[A], rng.Seed) => Gen[List[A]]): Prop =
     Prop.forAll(Gen.sized(size => f(size, arb[A], size * 2)(isEqual[A], seed))) { assertUniqueValues }
+
+  def containerWithUniqueValuesArbProp[A: Arb](f: Predicate[A] =>  Gen[List[A]]): Prop =
+    Prop.forAll(f(isEqual[A])) { assertUniqueValues }
+
+  def containerWithUniqueValuesGenProp[A: Arb](f: Gen[A] => Predicate[A] => Gen[List[A]]): Prop =
+    Prop.forAll(f(arb[A])(isEqual[A])) { assertUniqueValues }
+
+  def containerWithUniqueValuesWithNArbProp[A: Arb](f: (Int, Int) => Predicate[A] => Gen[List[A]]): Prop =
+    Prop.forAll(Gen.sized(size => f(size, size * 2)(isEqual[A]))) { assertUniqueValues }
+
+  def containerWithUniqueValuesWithNGenProp[A: Arb](f: (Int, Gen[A], Int) => Predicate[A] => Gen[List[A]]): Prop =
+    Prop.forAll(Gen.sized(size => f(size, arb[A], size * 2)(isEqual[A]))) { assertUniqueValues }
+
 }

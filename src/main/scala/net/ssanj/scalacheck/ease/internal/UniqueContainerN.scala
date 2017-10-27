@@ -5,16 +5,18 @@ import net.ssanj.scalacheck.ease.syntax._
 
 trait UniqueContainerN {
 
+  private val defaultRetries = 10
+
   private def found[A](l: List[A], value: A, isEqual: (A, A) => Boolean): Boolean = {
     l.exists(isEqual(_, value))
   }
 
   def uniqueListNSized[A: Arb](isEqual: (A, A) => Boolean): Gen[(List[A], Int)] = Gen.sized(size =>
-    uniqueListN(size, arb[A], size * 3)(isEqual).map((_, size))
+    uniqueListN(size, arb[A], size * defaultRetries)(isEqual).map((_, size))
   )
 
   def uniqueListNSized[A](ga: Gen[A])(isEqual: (A, A) => Boolean): Gen[(List[A], Int)] = Gen.sized(size =>
-    uniqueListN(size, ga, size * 3)(isEqual).map((_, size))
+    uniqueListN(size, ga, size * defaultRetries)(isEqual).map((_, size))
   )
 
   def uniqueListNRSized[A: Arb](retry: Int => Int)(isEqual: (A, A) => Boolean): Gen[(List[A], Int)] = Gen.sized(size =>

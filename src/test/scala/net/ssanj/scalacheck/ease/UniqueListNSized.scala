@@ -15,6 +15,8 @@ object UniqueListNSized {
 
   private def resize: Resize = identity
 
+  private def failingGen[A: Arb]: Gen[A] = Gen.oneOf(arb[A], Gen.fail[A])
+
   def containerWithResizeArbProp[A: Arb](f: Resize => Predicate[A] => Gen[(List[A], Int)]): Prop =
     Prop.forAll(f(resize)(isEqual[A])) { assertLength }
 
@@ -41,6 +43,13 @@ object UniqueListNSized {
 
   def containerWithUniqueValuesWithNArbProp[A: Arb](f: (Int, Int) => Predicate[A] => Gen[List[A]]): Prop =
     Prop.forAll(Gen.sized(size => f(size, size * 2)(isEqual[A]))) { assertUniqueValues }
+
+  //TODO: How can we make this test better?
+  //TODO: We only want to fail when the Generator fails not when the value is not unique.
+  def containerWithUniqueValuesWithNGenFailingProp[A: Arb](f: (Int, Gen[A], Int) => Predicate[A] => Gen[List[A]]): Prop =
+    Prop.forAll(Gen.choose(20, 100)) { n =>
+      f(n, failingGen[A], n * 10)(isEqual[A]) == Gen.fail
+    }
 
   def containerWithUniqueValuesWithNGenProp[A: Arb](f: (Int, Gen[A], Int) => Predicate[A] => Gen[List[A]]): Prop =
     Prop.forAll(Gen.sized(size => f(size, arb[A], size * 2)(isEqual[A]))) { assertUniqueValues }

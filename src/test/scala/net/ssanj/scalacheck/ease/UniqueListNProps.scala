@@ -43,6 +43,9 @@ object UniqueListNProps  {
 
       property("should always contain unique elements for AnyVal given n with Gen") =
         containerWithUniqueValuesWithNGenProp(G.uniqueListN[AnyVal])
+
+      property("should fail if the supplied Generator fails") =
+        containerWithUniqueValuesWithNGenFailingProp(G.uniqueListN[AnyVal])
     }
   }
 }

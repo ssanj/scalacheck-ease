@@ -13,9 +13,9 @@ object ShuffleProps extends Properties("shuffle") {
   final case class Shuffled[A](value: List[List[A]])
   final case class Picked[A](value: List[List[A]])
 
-  implicit def arbShuffledAndPicked[A: Arb]: Arb[(Original[A], Shuffled[A], Picked[A])]  = Arb {
+  private implicit def arbShuffledAndPicked[A: Arb]: Arb[(Original[A], Shuffled[A], Picked[A])]  = Arb {
       for {
-        size                   <- Gen.choose(2, 100)
+        size                   <- Gen.choose(10, 200)
         seed1                  <- arb[Seed]
         seed2                  <- arb[Seed]
         seed3                  <- arb[Seed]
@@ -26,9 +26,9 @@ object ShuffleProps extends Properties("shuffle") {
       } yield (Original(original), Shuffled(shuffled), Picked(picked))
     }
 
-  implicit def arbShuffled[A: Arb]: Arb[(Original[A], Shuffled[A])]  = Arb {
+  private implicit def arbShuffled[A: Arb]: Arb[(Original[A], Shuffled[A])]  = Arb {
       for {
-        size                   <- Gen.choose(2, 100)
+        size                   <- Gen.choose(10, 200)
         seed1                  <- arb[Seed]
         seed2                  <- arb[Seed]
         original               <- G.containerNSeed(size, discardSeedArb[A])(seed1)
@@ -37,11 +37,14 @@ object ShuffleProps extends Properties("shuffle") {
       } yield (Original(original), Shuffled(shuffled))
     }
 
+  private def groupByValues[A](list: List[List[A]]): Map[String, Int] =
+    list.groupBy(_.mkString("#")).mapValues(_.length)
+
   property("should be less than 70% identical to original on average") =
     Prop.forAll { pair: Tuple2[Original[Int], Shuffled[Int]] =>
         val original   = pair._1.value
         val shuffled   = pair._2.value
-        val mapped     = shuffled.groupBy(_.mkString("#")).mapValues(_.length)
+        val mapped     = groupByValues(shuffled)
 
         mapped.get(original.mkString).fold(Prop.passed) { value =>
           (value / shuffled.length.toDouble < 0.70) :|
@@ -56,12 +59,16 @@ object ShuffleProps extends Properties("shuffle") {
         val original      = triple._1.value
         val shuffled      = triple._2.value
         val picked        = triple._3.value
-        val shuffleMapped = shuffled.groupBy(_.mkString("#")).mapValues(_.length)
-        val pickedMapped  = picked.groupBy(_.mkString("#")).mapValues(_.length)
+        val shuffleMapped = groupByValues(shuffled)
+        val pickedMapped  = groupByValues(picked)
 
         val shuffleKeys   = shuffleMapped.keySet
         val pickedKeys    = pickedMapped.keySet
 
-        (shuffleKeys.size > pickedKeys.size) :| s"> Same spread:\n> Original keys: ${original.mkString(",")}\n> Shuffle keys: ${shuffleKeys.mkString(",")}\n> Pick keys: ${pickedMapped.keySet.mkString(",")}"
+        (shuffleKeys.size > pickedKeys.size) :|
+          s"> Same spread:\n" +
+          s"> Original keys: ${original.mkString(",")}\n" +
+          s"> Shuffle keys: ${shuffleKeys.mkString(",")}\n" +
+          s"> Pick keys: ${pickedMapped.keySet.mkString(",")}"
     }
 }

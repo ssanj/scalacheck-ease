@@ -5,14 +5,13 @@ import org.scalacheck._
 import org.scalacheck.rng.Seed
 import org.scalacheck.Prop._
 import syntax._
+import Implicits._
 
 object ShuffleProps extends Properties("shuffle") {
 
   final case class Original[A](value: List[A])
   final case class Shuffled[A](value: List[List[A]])
   final case class Picked[A](value: List[List[A]])
-
-  implicit def arbSeed: Arb[Seed] = Arb { Gen.choose(Int.MinValue, Int.MaxValue).map(Seed(_)) }
 
   implicit def arbShuffledAndPicked[A: Arb]: Arb[(Original[A], Shuffled[A], Picked[A])]  = Arb {
       for {

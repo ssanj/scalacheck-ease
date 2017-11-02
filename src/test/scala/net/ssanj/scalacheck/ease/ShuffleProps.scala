@@ -7,7 +7,7 @@ import org.scalacheck.Prop._
 import syntax._
 import Implicits._
 
-object ShuffleProps extends Properties("shuffle") {
+object ShuffleProps extends Properties("shuffle") with XProperties {
 
   final case class Original[A](value: List[A])
   final case class Shuffled[A](value: List[List[A]])

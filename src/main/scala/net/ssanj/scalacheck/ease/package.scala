@@ -21,5 +21,4 @@ package object syntax {
   def discardSeedGen[A](ga: Gen[A]): Seed => Gen[A] = _ => ga
 
   def discardSeedArb[A: Arb]: Seed => Gen[A] = _ => arb[A]
-
 }

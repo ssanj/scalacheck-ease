@@ -15,27 +15,35 @@ object ShuffleProps extends Properties("shuffle") {
 
   private implicit def arbShuffledAndPicked[A: Arb]: Arb[(Original[A], Shuffled[A], Picked[A])]  = Arb {
       for {
-        size                   <- Gen.choose(10, 200)
-        seed1                  <- arb[Seed]
-        seed2                  <- arb[Seed]
-        seed3                  <- arb[Seed]
-        original               <- G.containerNSeed(size, discardSeedArb[A])(seed1)
-        sampleSize             <- Gen.choose(100, 1000)
-        shuffled               <- G.containerNSeed(sampleSize, G.shuffle2(original))(seed2)
-        picked                 <- G.containerNSeed(sampleSize, discardSeedGen[List[A]](Gen.pick(size, original).map(_.toList)))(seed3)
+        size       <- Gen.choose(10, 200)
+        seed1      <- arb[Seed]
+        seed2      <- arb[Seed]
+        seed3      <- arb[Seed]
+        original   <- G.containerNSeed(size, discardSeedArb[A])(seed1)
+        sampleSize <- Gen.choose(100, 1000)
+        shuffled   <- G.containerNSeed(sampleSize, G.shuffle2(original))(seed2)
+        picked     <- G.containerNSeed(sampleSize, discardSeedGen[List[A]](Gen.pick(size, original).map(_.toList)))(seed3)
       } yield (Original(original), Shuffled(shuffled), Picked(picked))
     }
 
   private implicit def arbShuffled[A: Arb]: Arb[(Original[A], Shuffled[A])]  = Arb {
       for {
-        size                   <- Gen.choose(10, 200)
-        seed1                  <- arb[Seed]
-        seed2                  <- arb[Seed]
-        original               <- G.containerNSeed(size, discardSeedArb[A])(seed1)
-        sampleSize             <- Gen.choose(100, 1000)
-        shuffled               <- G.containerNSeed(sampleSize, G.shuffle2(original))(seed2)
+        size       <- Gen.choose(10, 200)
+        seed1      <- arb[Seed]
+        seed2      <- arb[Seed]
+        original   <- G.containerNSeed(size, discardSeedArb[A])(seed1)
+        sampleSize <- Gen.choose(100, 1000)
+        shuffled   <- G.containerNSeed(sampleSize, G.shuffle2(original))(seed2)
       } yield (Original(original), Shuffled(shuffled))
     }
+
+  private implicit def arbOriginal[A: Arb]: Arb[Original[A]] = Arb {
+    for {
+      size     <- Gen.choose(10, 200)
+      seed1    <- arb[Seed]
+      original <- G.containerNSeed(size, discardSeedArb[A])(seed1)
+    } yield (Original(original))
+  }
 
   private def groupByValues[A](list: List[List[A]]): Map[String, Int] =
     list.groupBy(_.mkString("#")).mapValues(_.length)
@@ -71,4 +79,20 @@ object ShuffleProps extends Properties("shuffle") {
           s"> Shuffle keys: ${shuffleKeys.mkString(",")}\n" +
           s"> Pick keys: ${pickedMapped.keySet.mkString(",")}"
     }
+
+  private def deterministicBySeedProperty[A: Arb]: Prop =
+    Prop.forAll { original: Original[A] =>
+      val value  = original.value
+      val seed1  = Seed.random()
+      val seed2  = Seed.random()
+      val params = Gen.Parameters.default
+      G.shuffle2(value)(seed1)(params, seed2) ?= G.shuffle2(value)(seed1)(params, seed2)
+    }
+
+  property("should be deterministic by Seed for Int") = deterministicBySeedProperty[Int]
+
+  property("should be deterministic by Seed for Char") = deterministicBySeedProperty[Char]
+
+  property("should be deterministic by Seed for AnyVal") = deterministicBySeedProperty[AnyVal]
+
 }

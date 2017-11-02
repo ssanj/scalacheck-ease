@@ -1,18 +1,9 @@
 package net.ssanj.scalacheck.ease.internal
 
-import scala.language.higherKinds
-import scala.collection.generic.CanBuildFrom
  import org.scalacheck._
  import org.scalacheck.rng.Seed
 
 trait ShuffleFun {
-
-  // def shuffle[C[X] <: TraversableOnce[X], A](gac: Gen[C[A]])(
-  //   implicit bf: CanBuildFrom[C[A], A, C[A]]): Gen[C[A]] =
-  //     gac.map(scala.util.Random.shuffle(_))
-
-  def shuffle[C[X] <: TraversableOnce[X], A](values: C[A])(
-    implicit bf: CanBuildFrom[C[A], A, C[A]]): C[A] = scala.util.Random.shuffle(values)
 
   def shuffle2[A](values: List[A]): Seed => Gen[List[A]] = seed => {
 
